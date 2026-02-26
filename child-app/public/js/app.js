@@ -184,9 +184,14 @@ function loadChildDashboard() {
     }
     
     loadFoods();
-    loadMeals();
-    loadAchievements();
-    loadTodayStats();
+    loadAchievements(); // Load but don't wait - will render when ready
+    
+    // Wait for meals to load before calculating today's stats
+    loadMeals().then(() => {
+        console.log('Meals loaded, now calculating stats...');
+        loadTodayStats();
+    });
+    
     showScreen('childDashboard');
 }
 
@@ -206,6 +211,22 @@ function showScreen(screenId) {
     if (targetScreen) {
         targetScreen.classList.add('active');
         console.log('✅ Screen switched to:', screenId);
+        
+        // Load data for screens that need it
+        if (screenId === 'todayStatsScreen') {
+            // Make sure meals are loaded before calculating stats
+            if (!appState.meals || appState.meals.length === 0) {
+                loadMeals().then(() => loadTodayStats());
+            } else {
+                loadTodayStats();
+            }
+        } else if (screenId === 'achievementsScreen') {
+            loadAchievements();
+        } else if (screenId === 'foodPreferencesScreen') {
+            loadFoodPreferences();
+        } else if (screenId === 'mealHistoryScreen') {
+            loadMealHistory();
+        }
     }
 }
 
@@ -246,10 +267,10 @@ function loadMeals() {
     const childId = appState.currentChild?.user_id;
     if (!childId) {
         console.error('❌ No child ID available for meals');
-        return;
+        return Promise.resolve([]);
     }
     
-    fetch(`../../backend/api/index.php?action=get_meals&child_id=${childId}`, {
+    return fetch(`../../backend/api/index.php?action=get_meals&child_id=${childId}`, {
         method: 'GET',
         credentials: 'include'
     })
@@ -260,11 +281,14 @@ function loadMeals() {
         if (data.success) {
             appState.meals = data.meals || [];
             console.log('✅ Meals count:', appState.meals.length);
+            return appState.meals;
         }
+        return [];
     })
     .catch(e => {
         console.error('Error loading meals:', e);
         appState.meals = [];
+        return [];
     });
 }
 
@@ -363,11 +387,11 @@ function loadAchievements() {
     
     const childId = appState.currentChild?.user_id;
     if (!childId) {
-        console.error('No child ID for achievements');
-        return;
+        console.error('❌ No child ID for achievements');
+        return Promise.resolve([]);
     }
     
-    fetch(`../../backend/api/index.php?action=get_achievements&child_id=${childId}`, {
+    return fetch(`../../backend/api/index.php?action=get_achievements&child_id=${childId}`, {
         credentials: 'include'
     })
     .then(r => r.json())
@@ -376,11 +400,21 @@ function loadAchievements() {
         
         if (data.success && data.achievements) {
             appState.achievements = data.achievements;
+            console.log('✅ Achievements loaded:', appState.achievements.length);
             renderAchievements();
+            return appState.achievements;
+        } else {
+            console.warn('⚠️ No achievements found:', data.message);
+            appState.achievements = [];
+            renderAchievements(); // Show empty message
+            return [];
         }
     })
     .catch(e => {
-        console.error('Error loading achievements:', e);
+        console.error('❌ Error loading achievements:', e);
+        appState.achievements = [];
+        renderAchievements(); // Show empty message on error
+        return [];
     });
 }
 
@@ -414,12 +448,25 @@ function renderAchievements() {
 
 function loadTodayStats() {
     console.log('📊 Loading today stats...');
+    console.log('appState.meals:', appState.meals);
+    
+    if (!appState.meals || appState.meals.length === 0) {
+        console.warn('⚠️ No meals loaded yet');
+        document.getElementById('mealsToday').textContent = '0';
+        document.getElementById('pointsToday').textContent = '0';
+        return;
+    }
     
     const today = new Date().toISOString().split('T')[0];
-    const todayMeals = appState.meals.filter(m => m.meal_date === today);
+    console.log('Today date:', today);
     
-    console.log('Today:', today);
-    console.log('Today meals:', todayMeals.length);
+    const todayMeals = appState.meals.filter(m => {
+        console.log('Checking meal:', m);
+        return m.meal_date === today || m.logged_at?.startsWith(today);
+    });
+    
+    console.log('Today meals:', todayMeals);
+    console.log('Today meals count:', todayMeals.length);
     
     // Update stats display
     document.getElementById('mealsToday').textContent = todayMeals.length;
@@ -506,11 +553,11 @@ function loadFoodPreferences() {
     
     const childId = appState.currentChild?.user_id;
     if (!childId) {
-        console.error('No child ID for preferences');
-        return;
+        console.error('❌ No child ID for preferences');
+        return Promise.resolve([]);
     }
     
-    fetch(`../../backend/api/index.php?action=get_food_preferences&child_id=${childId}`, {
+    return fetch(`../../backend/api/index.php?action=get_food_preferences&child_id=${childId}`, {
         credentials: 'include'
     })
     .then(r => r.json())
@@ -518,11 +565,19 @@ function loadFoodPreferences() {
         console.log('Food preferences response:', data);
         
         if (data.success && data.preferences) {
+            console.log('✅ Food preferences loaded:', data.preferences.length);
             renderFoodPreferences(data.preferences);
+            return data.preferences;
+        } else {
+            console.warn('⚠️ No food preferences found');
+            renderFoodPreferences([]);
+            return [];
         }
     })
     .catch(e => {
-        console.error('Error loading preferences:', e);
+        console.error('❌ Error loading preferences:', e);
+        renderFoodPreferences([]);
+        return [];
     });
 }
 
@@ -668,6 +723,8 @@ Version 1.0 - FIXED
 window.showScreen = showScreen;
 window.handleLogMeal = handleLogMeal;
 window.setRating = setRating;
+window.loadTodayStats = loadTodayStats;
+window.loadAchievements = loadAchievements;
 window.loadFoodPreferences = loadFoodPreferences;
 window.loadMealHistory = loadMealHistory;
 window.showSuccessModal = showSuccessModal;
