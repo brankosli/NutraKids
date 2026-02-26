@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutraKids - Healthy Eating for Kids</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- LOGIN SCREEN -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-wrapper">
+                <div class="logo-section">
+                    <h1>🥗 NutraKids</h1>
+                    <p>Healthy Eating Made Fun</p>
+                </div>
+
+                <div class="login-form">
+                    <form id="loginForm" method="POST" action="javascript:void(0)">
+                        <h3>Login</h3>
+                        <div id="loginError" class="error-box"></div>
+                        
+                        <div class="form-group">
+                            <label for="loginEmail">Email</label>
+                            <input type="email" id="loginEmail" name="email" placeholder="parent@test.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" name="password" placeholder="soccer10" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <p style="text-align: center; margin-top: 15px; font-size: 0.9rem; color: #666;">
+                            Demo: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e2928390878c96a296879196cc818d8f">[email&#160;protected]</a> / soccer10
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- PARENT DASHBOARD SCREEN -->
+        <div id="parentDashboard" class="screen">
+            <header class="header">
+                <div class="header-left">
+                    <h2>🏠 Parent Dashboard</h2>
+                </div>
+                <button id="parentLogoutBtn" class="btn btn-secondary">Logout</button>
+            </header>
+            
+            <main class="dashboard-content">
+                <h3>Welcome, <span id="parentName"></span>!</h3>
+                
+                <section class="section">
+                    <h4>👨‍👩‍👧‍👦 Your Children</h4>
+                    <div id="childrenList" class="children-grid"></div>
+                    <button id="addChildBtn" class="btn btn-primary">+ Add Child</button>
+                </section>
+
+                <section class="section">
+                    <h4>📊 Recent Activity</h4>
+                    <div id="recentActivity"></div>
+                </section>
+
+                <section class="section">
+                    <h4>🍽️ Manage Foods</h4>
+                    <p style="color: #666; margin-bottom: 15px;">Customize your family's food list</p>
+                    <button id="manageFoodsBtn" class="btn btn-primary">Manage Foods</button>
+                </section>
+            </main>
+        </div>
+
+        <!-- CHILD PROFILE CREATION SCREEN -->
+        <div id="childProfileScreen" class="screen">
+            <header class="header">
+                <h2>👧 Add Child Profile</h2>
+                <button class="btn-back" onclick="showScreen('parentDashboard')">← Back</button>
+            </header>
+
+            <main class="form-container">
+                <form id="childProfileForm" method="POST" action="javascript:void(0)">
+                    <div class="form-section">
+                        <h3>Basic Information</h3>
+                        <div class="form-group">
+                            <label for="childName">Child's Name</label>
+                            <input type="text" id="childName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="childAge">Age</label>
+                            <input type="number" id="childAge" name="age" min="5" max="18" required>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Allergies</h3>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="allergies" value="dairy"> Dairy</label>
+                            <label><input type="checkbox" name="allergies" value="peanuts"> Peanuts</label>
+                            <label><input type="checkbox" name="allergies" value="tree-nuts"> Tree Nuts</label>
+                            <label><input type="checkbox" name="allergies" value="shellfish"> Shellfish</label>
+                            <label><input type="checkbox" name="allergies" value="fish"> Fish</label>
+                            <label><input type="checkbox" name="allergies" value="gluten"> Gluten</label>
+                            <label><input type="checkbox" name="allergies" value="eggs"> Eggs</label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Health Goals</h3>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="goals" value="more-vegetables"> Eat More Vegetables</label>
+                            <label><input type="checkbox" name="goals" value="balanced"> Balanced Nutrition</label>
+                            <label><input type="checkbox" name="goals" value="protein"> Increase Protein</label>
+                            <label><input type="checkbox" name="goals" value="variety"> Try New Foods</label>
+                            <label><input type="checkbox" name="goals" value="hydration"> Better Hydration</label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Daily Calorie Target</h3>
+                        <input type="number" id="calorieTarget" name="calories" value="1800" min="1000" max="3000">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Create Child Profile</button>
+                </form>
+            </main>
+        </div>
+
+        <!-- FOOD QUESTIONNAIRE SCREEN -->
+        <div id="foodQuestionnaireScreen" class="screen">
+            <div class="questionnaire-wrapper">
+                <div class="questionnaire-header">
+                    <h2>🍽️ Let's Learn About <span id="foodQuestionChild"></span>'s Food Preferences!</h2>
+                    <p>Rate each food with how much you like it</p>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <p id="progressText">0 / 0 foods rated</p>
+                </div>
+
+                <div id="foodGrid" class="food-grid"></div>
+
+                <div class="questionnaire-footer">
+                    <button id="skipFoodBtn" class="btn btn-secondary" onclick="completeQuestionnaire()">Skip for Now</button>
+                    <button id="completeFoodBtn" class="btn btn-primary" disabled>Complete Questionnaire</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHILD DASHBOARD SCREEN -->
+        <div id="childDashboard" class="screen">
+            <header class="header">
+                <div class="header-left">
+                    <h2>👋 Welcome, <span id="childNameDisplay"></span>!</h2>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-back" onclick="showScreen('parentDashboard')">← Back</button>
+                    <button id="childLogoutBtn" class="btn btn-secondary">Logout</button>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <div class="dashboard-grid">
+                    <section class="card">
+                        <h3>📝 Log Your Meal</h3>
+                        <p>Tell us what you ate today!</p>
+                        <button onclick="showMealLogging()" class="btn btn-primary">Log Meal</button>
+                    </section>
+
+                    <section class="card">
+                        <h3>🏆 Achievements</h3>
+                        <p>See your rewards and badges</p>
+                        <button onclick="showScreen('achievementsScreen')" class="btn btn-primary">View Achievements</button>
+                    </section>
+
+                    <section class="card">
+                        <h3>📊 Meal History</h3>
+                        <p>Check your recent meals</p>
+                        <button onclick="showScreen('mealHistoryScreen')" class="btn btn-primary">View History</button>
+                    </section>
+
+                    <section class="card">
+                        <h3>🍽️ Food Preferences</h3>
+                        <p>See your food ratings</p>
+                        <button onclick="showScreen('foodPreferencesScreen'); showFoodPreferences();" class="btn btn-primary">View Preferences</button>
+                    </section>
+
+                    <section class="card">
+                        <h3>🤖 Meal Plans</h3>
+                        <p>Get AI-powered meal recommendations</p>
+                        <button onclick="generateMealPlan()" class="btn btn-primary">Generate Plan</button>
+                    </section>
+                </div>
+
+                <section class="section">
+                    <h3>📊 Today's Stats</h3>
+                    <div id="todayStats"></div>
+                </section>
+            </main>
+        </div>
+
+        <!-- ACHIEVEMENTS SCREEN -->
+        <div id="achievementsScreen" class="screen">
+            <header class="header">
+                <h2>🏆 Achievements</h2>
+                <button class="btn-back" onclick="showScreen('childDashboard')">← Back</button>
+            </header>
+
+            <main class="dashboard-content">
+                <div id="achievementsList" class="achievement-grid"></div>
+            </main>
+        </div>
+
+        <!-- MEAL HISTORY SCREEN -->
+        <div id="mealHistoryScreen" class="screen">
+            <header class="header">
+                <h2>📋 Meal History</h2>
+                <button class="btn-back" onclick="showScreen('childDashboard')">← Back</button>
+            </header>
+
+            <main class="dashboard-content">
+                <div id="mealsList"></div>
+            </main>
+        </div>
+
+        <!-- FOOD PREFERENCES SCREEN -->
+        <div id="foodPreferencesScreen" class="screen">
+            <header class="header">
+                <h2>🍽️ Your Food Preferences</h2>
+                <button class="btn-back" onclick="showScreen('childDashboard')">← Back</button>
+            </header>
+
+            <main class="dashboard-content">
+                <p style="margin-bottom: 20px; color: #666;">Here's what you rated during setup:</p>
+                <div id="preferencesGrid" class="food-grid"></div>
+            </main>
+        </div>
+
+        <!-- MANAGE FOODS SCREEN -->
+        <div id="manageFoodsScreen" class="screen">
+            <header class="header">
+                <h2>🍽️ Manage Foods</h2>
+                <button class="btn-back" onclick="showScreen('parentDashboard')">← Back</button>
+            </header>
+
+            <main class="dashboard-content">
+                <section class="section">
+                    <h3>Add New Food with AI</h3>
+                    <form id="addFoodForm" method="POST" action="javascript:void(0)">
+                        <div class="form-group">
+                            <label for="foodNameInput">Food Name</label>
+                            <input type="text" id="foodNameInput" placeholder="e.g., strawberries, brocoli, chicken nuggets" required>
+                            <small style="color: #666; margin-top: 5px; display: block;">AI will suggest category and emoji</small>
+                        </div>
+                        <button type="button" id="suggestFoodBtn" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B6B 0%, #ee5a6f 100%);">
+                            🤖 Suggest with AI
+                        </button>
+                    </form>
+
+                    <!-- AI Suggestion Display -->
+                    <div id="suggestionBox" style="display: none; margin-top: 20px; padding: 20px; background: #f0f7ff; border-left: 4px solid #2196F3; border-radius: 8px;">
+                        <h4 style="margin-top: 0; color: #2196F3;">AI Suggestion</h4>
+                        
+                        <div class="form-group">
+                            <label for="suggestedName">Food Name</label>
+                            <input type="text" id="suggestedName" placeholder="Food name" style="background: #fff; border: 1px solid #2196F3;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label for="suggestedEmoji">Emoji</label>
+                                <input type="text" id="suggestedEmoji" placeholder="🍓" maxlength="2" style="background: #fff; border: 1px solid #2196F3; font-size: 1.5rem; text-align: center;">
+                            </div>
+                            <div class="form-group">
+                                <label for="suggestedCategory">Category</label>
+                                <select id="suggestedCategory" style="background: #fff; border: 1px solid #2196F3;">
+                                    <option value="Fruits">Fruits</option>
+                                    <option value="Vegetables">Vegetables</option>
+                                    <option value="Protein">Protein</option>
+                                    <option value="Dairy">Dairy</option>
+                                    <option value="Grains">Grains</option>
+                                    <option value="Prepared Meals">Prepared Meals</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button type="button" id="confirmFoodBtn" class="btn btn-primary" style="flex: 1;">✓ Confirm & Add</button>
+                            <button type="button" id="rejectSuggestionBtn" class="btn btn-secondary" style="flex: 1;">✗ Try Again</button>
+                        </div>
+                    </div>
+
+                    <!-- Loading indicator -->
+                    <div id="loadingBox" style="display: none; margin-top: 20px; text-align: center; color: #666;">
+                        <p>🤔 Claude is analyzing the food...</p>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <h3>Your Foods</h3>
+                    <div id="foodsList"></div>
+                </section>
+            </main>
+        </div>
+
+        <!-- MEAL LOGGING MODAL -->
+        <div id="mealLoggingModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h3>📝 Log Your Meal</h3>
+                <form id="mealLoggingForm" method="POST" action="javascript:void(0)">
+                    <div class="form-group">
+                        <label for="mealType">Meal Type</label>
+                        <select id="mealType" required>
+                            <option value="">Select...</option>
+                            <option value="breakfast">🌅 Breakfast</option>
+                            <option value="lunch">🌞 Lunch</option>
+                            <option value="dinner">🌙 Dinner</option>
+                            <option value="snack">🍎 Snack</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mealName">What did you eat?</label>
+                        <input type="text" id="mealName" placeholder="e.g., Pasta with tomato sauce" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>How much did you like it?</label>
+                        <div class="rating-buttons">
+                            <button type="button" class="rating-btn" data-rating="1">😢 Didn't Like</button>
+                            <button type="button" class="rating-btn" data-rating="2">😐 Okay</button>
+                            <button type="button" class="rating-btn" data-rating="3">🙂 Good</button>
+                            <button type="button" class="rating-btn" data-rating="4">😊 Really Good</button>
+                            <button type="button" class="rating-btn" data-rating="5">😍 Loved It!</button>
+                        </div>
+                        <input type="hidden" id="mealRating" value="">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Meal</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

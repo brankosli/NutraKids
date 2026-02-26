@@ -1,0 +1,629 @@
+/* ==========================================
+   NutraKids Child App - Kid-Friendly Styles
+   ========================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #FF6B6B;      /* Bright Red */
+    --secondary-color: #4ECDC4;    /* Turquoise */
+    --accent-color: #FFE66D;       /* Sunny Yellow */
+    --success-color: #95E1D3;      /* Mint Green */
+    --bg-light: #F7F9FB;           /* Light Blue-Gray */
+    --text-dark: #2C3E50;          /* Dark Gray-Blue */
+    --text-light: #7F8C8D;         /* Medium Gray */
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-light);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* ==========================================
+   BASIC LAYOUT
+   ========================================== */
+
+.app-container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.screen {
+    display: none;
+    flex: 1;
+    width: 100%;
+}
+
+.screen.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==========================================
+   HEADER - KID-FRIENDLY
+   ========================================== */
+
+.header-child {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+}
+
+.header-child h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.header-left {
+    flex: 1;
+}
+
+/* ==========================================
+   BUTTONS - LARGE & COLORFUL
+   ========================================== */
+
+.btn {
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-large {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    min-height: 56px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #FF5252 100%);
+    color: white;
+    box-shadow: var(--shadow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
+.btn-primary:active {
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #3DBBB3;
+    transform: translateY(-2px);
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-logout {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 8px;
+    border: 2px solid white;
+}
+
+.btn-logout:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ==========================================
+   LOGIN SCREEN - WELCOMING
+   ========================================== */
+
+.login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.logo-section {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+
+.logo-section h1 {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.logo-section p {
+    font-size: 1.3rem;
+    opacity: 0.95;
+}
+
+.login-form {
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-form form {
+    width: 100%;
+}
+
+.login-form button {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* ==========================================
+   FORM GROUPS - LARGE & CLEAR
+   ========================================== */
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 1rem;
+    border: 2px solid #E0E0E0;
+    border-radius: 10px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+/* ==========================================
+   DASHBOARD CONTENT - COLORFUL
+   ========================================== */
+
+.dashboard-content-child {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* ==========================================
+   DAILY CHALLENGE
+   ========================================== */
+
+.daily-challenge {
+    margin-bottom: 32px;
+}
+
+.challenge-card {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #FFD93D 100%);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.challenge-card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+}
+
+.challenge-content {
+    font-size: 1.1rem;
+}
+
+/* ==========================================
+   QUICK ACTIONS - LARGE CARDS
+   ========================================== */
+
+.quick-actions h2 {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.action-card {
+    background: white;
+    border: none;
+    border-radius: 16px;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    min-height: 140px;
+    justify-content: center;
+    gap: 12px;
+}
+
+.action-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-hover);
+}
+
+.action-card:active {
+    transform: translateY(-4px);
+}
+
+.action-emoji {
+    font-size: 2.5rem;
+}
+
+.action-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    text-align: center;
+}
+
+/* ==========================================
+   STATS DISPLAY
+   ========================================== */
+
+.today-summary h2 {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+/* ==========================================
+   RATING BUTTONS
+   ========================================== */
+
+.rating-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.rating-btn {
+    background: white;
+    border: 3px solid #E0E0E0;
+    border-radius: 12px;
+    padding: 12px 8px;
+    font-size: 2rem;
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.rating-btn:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.rating-btn.selected {
+    border-color: var(--primary-color);
+    background: rgba(255, 107, 107, 0.1);
+}
+
+/* ==========================================
+   ACHIEVEMENTS
+   ========================================== */
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+}
+
+.achievement-badge {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.achievement-badge:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-hover);
+}
+
+.achievement-icon {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.achievement-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+}
+
+.achievement-description {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+/* ==========================================
+   PREFERENCES
+   ========================================== */
+
+.preferences-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 16px;
+}
+
+.food-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.food-card .emoji {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.food-card .name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+/* ==========================================
+   MODALS
+   ========================================== */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content-child {
+    background: white;
+    border-radius: 24px;
+    padding: 40px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+}
+
+.success-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    animation: bounce 0.6s ease infinite;
+}
+
+.modal-content-child h2 {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+    color: var(--primary-color);
+}
+
+.modal-content-child p {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    margin-bottom: 24px;
+}
+
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* ==========================================
+   ERROR & SUCCESS MESSAGES
+   ========================================== */
+
+.error-box {
+    background: #FFE0E0;
+    color: #C33;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    display: none;
+}
+
+.error-box.show {
+    display: block;
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
+
+@media (max-width: 768px) {
+    .header-child h1 {
+        font-size: 1.4rem;
+    }
+
+    .dashboard-content-child {
+        padding: 16px;
+    }
+
+    .action-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .login-form {
+        padding: 32px 20px;
+    }
+
+    .rating-buttons {
+        gap: 8px;
+    }
+
+    .rating-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-child {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .header-child h1 {
+        font-size: 1.3rem;
+    }
+
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .login-wrapper {
+        padding: 16px;
+    }
+
+    .logo-section h1 {
+        font-size: 2.5rem;
+    }
+
+    .modal-content-child {
+        padding: 32px 20px;
+    }
+}
+
+/* ==========================================
+   PRINT STYLES
+   ========================================== */
+
+@media print {
+    body {
+        background: white;
+    }
+
+    .btn {
+        display: none;
+    }
+}

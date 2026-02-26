@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🥗 NutraKids - Child App</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- LOGIN SCREEN -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-wrapper">
+                <div class="logo-section">
+                    <h1>🥗 NutraKids</h1>
+                    <p style="font-size: 1.3rem; margin-bottom: 30px;">Hey there, young explorer! 👋</p>
+                    <p style="color: #666; margin-bottom: 30px;">Login to start your healthy eating adventure!</p>
+                </div>
+
+                <div class="login-form">
+                    <form id="loginForm" method="POST" action="javascript:void(0)">
+                        <div id="loginError" class="error-box"></div>
+                        
+                        <div class="form-group">
+                            <label for="loginEmail">📧 Your Email</label>
+                            <input type="email" id="loginEmail" name="email" placeholder="your.email@family.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="loginPassword">🔐 Your Password</label>
+                            <input type="password" id="loginPassword" name="password" placeholder="Your secret password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-large">Login 🎉</button>
+                        
+                        <p style="text-align: center; margin-top: 20px; color: #666; font-size: 0.95rem;">
+                            Ask your parents for your login info!
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHILD DASHBOARD SCREEN -->
+        <div id="childDashboard" class="screen">
+            <header class="header-child">
+                <div class="header-left">
+                    <h1>👋 Hi, <span id="childNameDisplay"></span>! 🌟</h1>
+                </div>
+                <button id="childLogoutBtn" class="btn btn-logout">Logout</button>
+            </header>
+
+            <main class="dashboard-content-child">
+                <!-- TODAY'S CHALLENGE -->
+                <section class="daily-challenge">
+                    <div class="challenge-card">
+                        <h2>📅 Today's Challenge</h2>
+                        <div id="todayChallenge" class="challenge-content">
+                            <p>Loading your challenge...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- QUICK ACTIONS -->
+                <section class="quick-actions">
+                    <h2 style="margin-bottom: 20px;">⚡ Quick Actions</h2>
+                    <div class="action-grid">
+                        <button onclick="showScreen('mealLoggingScreen')" class="action-card">
+                            <span class="action-emoji">🍽️</span>
+                            <span class="action-text">Log a Meal</span>
+                        </button>
+
+                        <button onclick="showScreen('todayStatsScreen')" class="action-card">
+                            <span class="action-emoji">📊</span>
+                            <span class="action-text">Today's Stats</span>
+                        </button>
+
+                        <button onclick="showScreen('achievementsScreen')" class="action-card">
+                            <span class="action-emoji">🏆</span>
+                            <span class="action-text">Achievements</span>
+                        </button>
+
+                        <button onclick="showScreen('foodPreferencesScreen')" class="action-card">
+                            <span class="action-emoji">❤️</span>
+                            <span class="action-text">My Favorites</span>
+                        </button>
+
+                        <button onclick="showScreen('mealHistoryScreen')" class="action-card">
+                            <span class="action-emoji">📜</span>
+                            <span class="action-text">Meal History</span>
+                        </button>
+
+                        <button onclick="showAboutApp()" class="action-card">
+                            <span class="action-emoji">ℹ️</span>
+                            <span class="action-text">About</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- TODAY'S SUMMARY -->
+                <section class="today-summary">
+                    <h2>🌟 Today's Summary</h2>
+                    <div id="todayStats" class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🍽️</div>
+                            <div class="stat-value" id="mealsToday">0</div>
+                            <div class="stat-label">Meals Logged</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⭐</div>
+                            <div class="stat-value" id="pointsToday">0</div>
+                            <div class="stat-label">Points Earned</div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- MEAL LOGGING SCREEN -->
+        <div id="mealLoggingScreen" class="screen">
+            <header class="header-child">
+                <h1>🍽️ Log Your Meal</h1>
+                <button class="btn btn-back" onclick="showScreen('childDashboard')">← Back</button>
+            </header>
+
+            <main class="dashboard-content-child">
+                <form id="mealLoggingForm" class="meal-form">
+                    <div class="form-group">
+                        <label>🍴 What did you eat?</label>
+                        <input type="text" id="mealName" placeholder="e.g., Pizza, Apple, Pasta..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>⏰ What meal was it?</label>
+                        <select id="mealType" required>
+                            <option value="">Choose a meal...</option>
+                            <option value="breakfast">🌅 Breakfast</option>
+                            <option value="lunch">🌞 Lunch</option>
+                            <option value="dinner">🌙 Dinner</option>
+                            <option value="snack">🍎 Snack</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>⭐ How much did you like it?</label>
+                        <div class="rating-buttons">
+                            <button type="button" class="rating-btn" data-rating="1" onclick="setRating(1)">😢</button>
+                            <button type="button" class="rating-btn" data-rating="2" onclick="setRating(2)">😐</button>
+                            <button type="button" class="rating-btn" data-rating="3" onclick="setRating(3)">🙂</button>
+                            <button type="button" class="rating-btn" data-rating="4" onclick="setRating(4)">😊</button>
+                            <button type="button" class="rating-btn" data-rating="5" onclick="setRating(5)">😍</button>
+                        </div>
+                        <input type="hidden" id="mealRating" value="">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">✨ Save Meal ✨</button>
+                </form>
+            </main>
+        </div>
+
+        <!-- TODAY'S STATS SCREEN -->
+        <div id="todayStatsScreen" class="screen">
+            <header class="header-child">
+                <h1>📊 Today's Stats</h1>
+                <button class="btn btn-back" onclick="showScreen('childDashboard')">← Back</button>
+            </header>
+
+            <main class="dashboard-content-child">
+                <div id="todayStatsDetail" class="stats-detail">
+                    <p>Loading your stats...</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- ACHIEVEMENTS SCREEN -->
+        <div id="achievementsScreen" class="screen">
+            <header class="header-child">
+                <h1>🏆 Your Achievements</h1>
+                <button class="btn btn-back" onclick="showScreen('childDashboard')">← Back</button>
+            </header>
+
+            <main class="dashboard-content-child">
+                <div id="achievementsList" class="achievements-grid">
+                    <p>Loading your achievements...</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- FOOD PREFERENCES SCREEN -->
+        <div id="foodPreferencesScreen" class="screen">
+            <header class="header-child">
+                <h1>❤️ My Favorite Foods</h1>
+                <button class="btn btn-back" onclick="showScreen('childDashboard')">← Back</button>
+            </header>
+
+            <main class="dashboard-content-child">
+                <div id="preferencesGrid" class="preferences-grid">
+                    <p>Loading your favorites...</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- MEAL HISTORY SCREEN -->
+        <div id="mealHistoryScreen" class="screen">
+            <header class="header-child">
+                <h1>📜 Meal History</h1>
+                <button class="btn btn-back" onclick="showScreen('childDashboard')">← Back</button>
+            </header>
+
+            <main class="dashboard-content-child">
+                <div id="mealHistoryContainer" class="meal-history">
+                    <p>Loading your meal history...</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- SUCCESS MODAL -->
+        <div id="successModal" class="modal" style="display: none;">
+            <div class="modal-content-child">
+                <div class="success-icon">✨</div>
+                <h2>Great Job! 🎉</h2>
+                <p id="successMessage">You're doing amazing!</p>
+                <button onclick="closeSuccessModal()" class="btn btn-primary btn-large">Continue 🌟</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
