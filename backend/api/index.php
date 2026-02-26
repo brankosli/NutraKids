@@ -407,6 +407,61 @@ try {
         }
     }
     
+    else if ($action === 'get_achievements') {
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+            exit;
+        }
+        
+        $child_id = $_GET['child_id'] ?? null;
+        
+        if (!$child_id) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Child ID required']);
+            exit;
+        }
+        
+        try {
+            $db = new Database();
+            
+            // Get child's earned achievements
+            $db->prepare("
+                SELECT 
+                    a.achievement_id,
+                    a.achievement_code,
+                    a.achievement_name as name,
+                    a.description,
+                    a.points_awarded,
+                    a.icon_url,
+                    ca.earned_at
+                FROM achievements a
+                INNER JOIN child_achievements ca ON a.achievement_id = ca.achievement_id AND ca.child_user_id = ?
+                ORDER BY ca.earned_at DESC, a.achievement_name ASC
+            ")
+                ->bind([['type' => 'i', 'value' => $child_id]])
+                ->execute();
+            
+            $achievements = $db->fetchAll();
+            
+            // Add default emoji in PHP if icon_url is empty
+            foreach ($achievements as &$achievement) {
+                if (empty($achievement['icon_url'])) {
+                    $achievement['icon_url'] = '🏆';
+                }
+                $achievement['emoji'] = $achievement['icon_url'];
+            }
+            
+            echo json_encode([
+                'success' => true,
+                'achievements' => $achievements
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+    
     // ============================================
     // FOOD PREFERENCES ENDPOINTS
     // ============================================

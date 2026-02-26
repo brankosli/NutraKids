@@ -243,7 +243,13 @@ function loadFoods() {
 function loadMeals() {
     console.log('📜 Loading meals from API...');
     
-    fetch('../../backend/api/index.php?action=get_meals', {
+    const childId = appState.currentChild?.user_id;
+    if (!childId) {
+        console.error('❌ No child ID available for meals');
+        return;
+    }
+    
+    fetch(`../../backend/api/index.php?action=get_meals&child_id=${childId}`, {
         method: 'GET',
         credentials: 'include'
     })
@@ -289,22 +295,29 @@ function handleLogMeal(e) {
     const mealName = document.getElementById('mealName').value.trim();
     const mealType = document.getElementById('mealType').value;
     const rating = appState.selectedRating;
+    const childId = appState.currentChild?.user_id;
+    
+    if (!childId) {
+        alert('Error: Child ID not found. Please reload the page.');
+        return;
+    }
     
     if (!mealName || !mealType || !rating) {
         alert('Please fill all fields and select a rating! 🙏');
         return;
     }
     
-    console.log('Logging meal:', { mealName, mealType, rating });
+    console.log('Logging meal:', { childId, mealName, mealType, rating });
     
     fetch('../../backend/api/index.php?action=log_meal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
+            child_id: childId,
             meal_name: mealName,
             meal_type: mealType,
-            rating: rating
+            meal_rating: rating
         })
     })
     .then(r => r.json())
@@ -380,13 +393,17 @@ function renderAchievements() {
         return;
     }
     
-    const html = appState.achievements.map(achievement => `
-        <div class="achievement-badge">
-            <div class="achievement-icon">${achievement.emoji || '🏆'}</div>
-            <div class="achievement-name">${achievement.name}</div>
-            <div class="achievement-description">${achievement.description}</div>
-        </div>
-    `).join('');
+    const html = appState.achievements.map(achievement => {
+        // emoji field contains either emoji string or icon_url, default to 🏆
+        const icon = achievement.emoji || achievement.icon_url || '🏆';
+        return `
+            <div class="achievement-badge">
+                <div class="achievement-icon">${icon}</div>
+                <div class="achievement-name">${achievement.name}</div>
+                <div class="achievement-description">${achievement.description}</div>
+            </div>
+        `;
+    }).join('');
     
     container.innerHTML = html;
 }
