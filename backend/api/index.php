@@ -960,6 +960,276 @@ Example response:
             echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
         }
     }
+
+    // ============================================
+    // GAMIFICATION - LOG FOOD (MODIFIED)
+    // ============================================
+
+    else if ($action === 'log_food') {
+        // Log a single food item
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $child_id = $input['child_id'] ?? null;
+        $meal_name = $input['food_name'] ?? null;
+        $meal_type = $input['meal_type'] ?? null;
+        $meal_rating = $input['meal_rating'] ?? null;
+
+        if (!$child_id || !$meal_type || !$meal_name || !$meal_rating) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+            exit;
+        }
+
+        try {
+            $db = new Database();
+
+            // Get household_id for this child
+            $db->prepare("SELECT household_id FROM child_profiles WHERE child_user_id = ?")
+                ->bind([['type' => 'i', 'value' => $child_id]])
+                ->execute();
+            $profile = $db->fetch();
+
+            if (!$profile) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Child profile not found']);
+                exit;
+            }
+
+            $household_id = $profile['household_id'];
+
+            // Check if this is a new food for this child (first time logging this meal_name)
+            $db->prepare("
+                SELECT COUNT(*) as count FROM logged_meals 
+                WHERE child_user_id = ? AND LOWER(meal_name) = LOWER(?)
+            ")
+                ->bind([
+                    ['type' => 'i', 'value' => $child_id],
+                    ['type' => 's', 'value' => $meal_name]
+                ])
+                ->execute();
+            $result = $db->fetch();
+            $is_new_food = ($result['count'] == 0);
+
+            // Calculate points
+            $points = 10;  // Base
+            if ($meal_rating >= 4) {
+                $points += 10;  // Good rating bonus
+            }
+            if ($is_new_food) {
+                $points += 20;  // New food bonus
+            }
+
+            // Log the meal with points_earned
+            $db->prepare("
+                INSERT INTO logged_meals (
+                    child_user_id, household_id, meal_date, meal_type, 
+                    meal_name, meal_rating, points_earned
+                ) VALUES (?, ?, CURDATE(), ?, ?, ?, ?)
+            ")
+                ->bind([
+                    ['type' => 'i', 'value' => $child_id],
+                    ['type' => 'i', 'value' => $household_id],
+                    ['type' => 's', 'value' => $meal_type],
+                    ['type' => 's', 'value' => $meal_name],
+                    ['type' => 'i', 'value' => $meal_rating],
+                    ['type' => 'i', 'value' => $points]
+                ])
+                ->execute();
+
+            // Update user total points
+            $db->prepare("UPDATE users SET points_total = points_total + ? WHERE user_id = ?")
+                ->bind([
+                    ['type' => 'i', 'value' => $points],
+                    ['type' => 'i', 'value' => $child_id]
+                ])
+                ->execute();
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Food logged!',
+                'points_earned' => $points,
+                'is_new_food' => $is_new_food,
+                'bonus_reason' => $is_new_food ? 'First time trying this food!' : ($meal_rating >= 4 ? 'Great rating!' : '')
+            ]);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
+    else if ($action === 'log_water') {
+        // Log water intake
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $child_id = $input['child_id'] ?? null;
+        $cups = $input['cups'] ?? 1;
+
+        if (!$child_id) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Child ID required']);
+            exit;
+        }
+
+        try {
+            $db = new Database();
+
+            $points = 5 * $cups;  // 5 points per cup
+
+            // Get or create today's water log
+            $today = date('Y-m-d');
+
+            // Check if water intake already exists for today
+            $db->prepare("SELECT water_intake FROM daily_tracking WHERE child_user_id = ? AND tracking_date = ?")
+                ->bind([
+                    ['type' => 'i', 'value' => $child_id],
+                    ['type' => 's', 'value' => $today]
+                ])
+                ->execute();
+            $existing = $db->fetch();
+
+            if ($existing) {
+                // Update existing
+                $db->prepare("
+                    UPDATE daily_tracking 
+                    SET water_intake = water_intake + ?, daily_points = daily_points + ?
+                    WHERE child_user_id = ? AND tracking_date = ?
+                ")
+                    ->bind([
+                        ['type' => 'i', 'value' => $cups],
+                        ['type' => 'i', 'value' => $points],
+                        ['type' => 'i', 'value' => $child_id],
+                        ['type' => 's', 'value' => $today]
+                    ])
+                    ->execute();
+            } else {
+                // Insert new
+                $db->prepare("
+                    INSERT INTO daily_tracking (child_user_id, tracking_date, water_intake, daily_points)
+                    VALUES (?, ?, ?, ?)
+                ")
+                    ->bind([
+                        ['type' => 'i', 'value' => $child_id],
+                        ['type' => 's', 'value' => $today],
+                        ['type' => 'i', 'value' => $cups],
+                        ['type' => 'i', 'value' => $points]
+                    ])
+                    ->execute();
+            }
+
+            // Update user total points
+            $db->prepare("UPDATE users SET points_total = points_total + ? WHERE user_id = ?")
+                ->bind([
+                    ['type' => 'i', 'value' => $points],
+                    ['type' => 'i', 'value' => $child_id]
+                ])
+                ->execute();
+
+            // Get updated water total
+            $db->prepare("SELECT water_intake FROM daily_tracking WHERE child_user_id = ? AND tracking_date = ?")
+                ->bind([
+                    ['type' => 'i', 'value' => $child_id],
+                    ['type' => 's', 'value' => $today]
+                ])
+                ->execute();
+            $tracking = $db->fetch();
+
+            $water_total = (int)($tracking['water_intake'] ?? 0);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Water logged!',
+                'points_earned' => $points,
+                'water_today' => $water_total,
+                'goal' => 8,
+                'bonus' => ($water_total >= 8 ? 'Hydration Hero! +20 bonus!' : '')
+            ]);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
+    else if ($action === 'get_daily_points') {
+        // Get today's points and stats
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+            exit;
+        }
+
+        $child_id = $_GET['child_id'] ?? null;
+
+        if (!$child_id) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Child ID required']);
+            exit;
+        }
+
+        try {
+            $db = new Database();
+
+            // Get total points
+            $db->prepare("SELECT points_total FROM users WHERE user_id = ?")
+                ->bind([['type' => 'i', 'value' => $child_id]])
+                ->execute();
+            $user = $db->fetch();
+
+            // Get today's meals
+            $today = date('Y-m-d');
+            $db->prepare("
+                SELECT COUNT(*) as meals_count, COALESCE(SUM(points_earned), 0) as today_points
+                FROM logged_meals 
+                WHERE child_user_id = ? AND meal_date = ?
+            ")
+                ->bind([
+                    ['type' => 'i', 'value' => $child_id],
+                    ['type' => 's', 'value' => $today]
+                ])
+                ->execute();
+            $meals_data = $db->fetch();
+
+            // Get water intake
+            $db->prepare("SELECT water_intake FROM daily_tracking WHERE child_user_id = ? AND tracking_date = ?")
+                ->bind([
+                    ['type' => 'i', 'value' => $child_id],
+                    ['type' => 's', 'value' => $today]
+                ])
+                ->execute();
+            $water_data = $db->fetch();
+
+            $water_intake = (int)($water_data['water_intake'] ?? 0);
+            $meals_count = (int)($meals_data['meals_count'] ?? 0);
+            $today_points = (int)($meals_data['today_points'] ?? 0);
+
+            // Add water points to today's total
+            $today_points += ($water_intake * 5);
+
+            echo json_encode([
+                'success' => true,
+                'total_points' => (int)($user['points_total'] ?? 0),
+                'today_points' => $today_points,
+                'meals_logged' => $meals_count,
+                'water_intake' => $water_intake,
+                'water_goal' => 8
+            ]);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
     
     else {
         http_response_code(404);

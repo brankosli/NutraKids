@@ -1,6 +1,6 @@
-/* ==========================================
-   NutraKids Child App - Kid-Friendly Styles
-   ========================================== */
+/* ============================================
+   🥗 NutraKids - Child App V1.1 CSS
+   ============================================ */
 
 * {
     margin: 0;
@@ -8,464 +8,700 @@
     box-sizing: border-box;
 }
 
-:root {
-    --primary-color: #FF6B6B;      /* Bright Red */
-    --secondary-color: #4ECDC4;    /* Turquoise */
-    --accent-color: #FFE66D;       /* Sunny Yellow */
-    --success-color: #95E1D3;      /* Mint Green */
-    --bg-light: #F7F9FB;           /* Light Blue-Gray */
-    --text-dark: #2C3E50;          /* Dark Gray-Blue */
-    --text-light: #7F8C8D;         /* Medium Gray */
-    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-body {
+html, body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: var(--bg-light);
-    color: var(--text-dark);
+    background: #f5f7fa;
+    color: #2c3e50;
     line-height: 1.6;
 }
 
-/* ==========================================
-   BASIC LAYOUT
-   ========================================== */
-
-.app-container {
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
+/* ============================================
+   GENERAL STYLES
+   ============================================ */
 
 .screen {
     display: none;
-    flex: 1;
-    width: 100%;
+    padding: 0;
 }
 
 .screen.active {
-    display: flex;
-    flex-direction: column;
+    display: block;
 }
 
-/* ==========================================
-   HEADER - KID-FRIENDLY
-   ========================================== */
-
-.header-child {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+.screen-header {
+    background: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%);
     color: white;
     padding: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: var(--shadow);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.header-child h1 {
+.screen-header h2 {
     font-size: 1.8rem;
-    font-weight: 700;
     margin: 0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.header-left {
-    flex: 1;
+.screen-content {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
-/* ==========================================
-   BUTTONS - LARGE & COLORFUL
-   ========================================== */
+/* ============================================
+   BUTTONS & INPUTS
+   ============================================ */
 
 .btn {
+    padding: 12px 24px;
     border: none;
     border-radius: 12px;
     font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-weight: 600;
+    text-transform: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #FF6B6B, #FF5252);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+}
+
+.btn-secondary {
+    background: #4ECDC4;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #3dbab2;
 }
 
 .btn-large {
     padding: 16px 32px;
     font-size: 1.1rem;
-    min-height: 56px;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #FF5252 100%);
-    color: white;
-    box-shadow: var(--shadow);
-}
-
-.btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-hover);
-}
-
-.btn-primary:active {
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: var(--secondary-color);
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #3DBBB3;
-    transform: translateY(-2px);
+    width: 100%;
 }
 
 .btn-back {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255,255,255,0.3);
     color: white;
     padding: 8px 16px;
+    border: none;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .btn-back:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255,255,255,0.5);
 }
 
 .btn-logout {
-    padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255,255,255,0.2);
     color: white;
+    border: none;
+    padding: 8px 16px;
     border-radius: 8px;
-    border: 2px solid white;
+    cursor: pointer;
+    font-size: 0.9rem;
 }
 
 .btn-logout:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255,255,255,0.3);
 }
 
-/* ==========================================
-   LOGIN SCREEN - WELCOMING
-   ========================================== */
-
-.login-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
 }
 
-.logo-section {
-    text-align: center;
+.btn-small {
+    padding: 4px 12px;
+    font-size: 0.9rem;
+}
+
+.btn-water {
+    background: linear-gradient(135deg, #4ECDC4, #3dbab2);
     color: white;
-    margin-bottom: 40px;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin: 8px;
 }
 
-.logo-section h1 {
-    font-size: 3.5rem;
-    margin-bottom: 10px;
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+.btn-water:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(78, 205, 196, 0.3);
 }
 
-.logo-section p {
-    font-size: 1.3rem;
-    opacity: 0.95;
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    margin: 8px 0;
+    transition: all 0.3s ease;
 }
 
-.login-form {
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: #FF6B6B;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.2);
+}
+
+/* ============================================
+   LOGIN SCREEN
+   ============================================ */
+
+.login-container {
+    max-width: 400px;
+    margin: 60px auto;
     background: white;
     padding: 40px;
-    border-radius: 24px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 400px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    text-align: center;
 }
 
-.login-form form {
-    width: 100%;
+.logo {
+    font-size: 4rem;
+    margin-bottom: 20px;
 }
 
-.login-form button {
-    width: 100%;
-    margin-top: 20px;
+.login-container h1 {
+    font-size: 2rem;
+    color: #FF6B6B;
+    margin-bottom: 8px;
 }
 
-/* ==========================================
-   FORM GROUPS - LARGE & CLEAR
-   ========================================== */
+.login-container p {
+    color: #999;
+    margin-bottom: 30px;
+}
 
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
+    text-align: left;
 }
 
 .form-group label {
     display: block;
-    font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text-dark);
+    margin-bottom: 6px;
+    color: #2c3e50;
 }
 
-.form-group input,
-.form-group select {
-    width: 100%;
-    padding: 14px 16px;
-    font-size: 1rem;
-    border: 2px solid #E0E0E0;
-    border-radius: 10px;
-    font-family: inherit;
-    transition: all 0.3s ease;
+.error-message {
+    color: #e74c3c;
+    padding: 10px;
+    background: #fadbd8;
+    border-radius: 8px;
+    margin: 12px 0;
+    display: none;
 }
 
-.form-group input:focus,
-.form-group select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+.error-message.show {
+    display: block;
 }
 
-/* ==========================================
-   DASHBOARD CONTENT - COLORFUL
-   ========================================== */
+/* ============================================
+   DASHBOARD
+   ============================================ */
 
-.dashboard-content-child {
-    flex: 1;
-    padding: 24px;
-    overflow-y: auto;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-}
-
-/* ==========================================
-   DAILY CHALLENGE
-   ========================================== */
-
-.daily-challenge {
-    margin-bottom: 32px;
-}
-
-.challenge-card {
-    background: linear-gradient(135deg, var(--accent-color) 0%, #FFD93D 100%);
-    padding: 24px;
-    border-radius: 16px;
-    box-shadow: var(--shadow);
+.dashboard-header {
+    background: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%);
     color: white;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 24px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.challenge-card h2 {
-    font-size: 1.6rem;
-    margin-bottom: 12px;
+.dashboard-header h1 {
+    font-size: 1.8rem;
+    margin: 0;
 }
 
-.challenge-content {
-    font-size: 1.1rem;
+/* ============================================
+   POINTS SECTION
+   ============================================ */
+
+.points-section {
+    background: white;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-/* ==========================================
-   QUICK ACTIONS - LARGE CARDS
-   ========================================== */
+.points-display {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 20px;
+}
 
-.quick-actions h2 {
-    font-size: 1.5rem;
+.points-total,
+.points-today {
+    flex: 1;
+    text-align: center;
+    padding: 16px;
+    background: linear-gradient(135deg, #FFE66D, #FFD93D);
+    border-radius: 12px;
+    color: white;
+}
+
+.points-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.points-label {
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.points-divider {
+    width: 2px;
+    height: 60px;
+    background: #FFE66D;
+}
+
+/* ============================================
+   SUMMARY SECTION
+   ============================================ */
+
+.summary-section {
+    padding: 20px;
+    background: white;
+    margin: 0 20px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.summary-section h2 {
+    font-size: 1.3rem;
     margin-bottom: 16px;
 }
 
-.action-grid {
+.summary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #4ECDC4, #3dbab2);
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(78, 205, 196, 0.2);
+}
+
+.summary-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.summary-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.summary-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* ============================================
+   ACTIONS SECTION
+   ============================================ */
+
+.actions-section {
+    padding: 20px;
+    background: white;
+    margin: 0 20px 20px;
+    border-radius: 16px;
+}
+
+.actions-section h3 {
+    margin-bottom: 16px;
+    font-size: 1.2rem;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .action-card {
     background: white;
-    border: none;
-    border-radius: 16px;
-    padding: 24px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-    min-height: 140px;
+    gap: 8px;
+    min-height: 120px;
     justify-content: center;
-    gap: 12px;
 }
 
 .action-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-hover);
-}
-
-.action-card:active {
+    border-color: #FF6B6B;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.05), rgba(255, 230, 109, 0.05));
     transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(255, 107, 107, 0.15);
 }
 
-.action-emoji {
+.action-icon {
     font-size: 2.5rem;
 }
 
-.action-text {
-    font-size: 1rem;
+.action-name {
     font-weight: 600;
-    color: var(--text-dark);
-    text-align: center;
+    color: #2c3e50;
 }
 
-/* ==========================================
-   STATS DISPLAY
-   ========================================== */
+/* ============================================
+   MEALS BREAKDOWN
+   ============================================ */
 
-.today-summary h2 {
-    font-size: 1.5rem;
-    margin-bottom: 16px;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 16px;
-}
-
-.stat-card {
-    background: white;
+.meals-breakdown-section {
     padding: 20px;
+    background: white;
+    margin: 0 20px 20px;
     border-radius: 16px;
-    box-shadow: var(--shadow);
-    text-align: center;
 }
 
-.stat-icon {
-    font-size: 2.5rem;
+.meals-breakdown-section h3 {
     margin-bottom: 12px;
+    font-size: 1.1rem;
 }
 
-.stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--primary-color);
+.meals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.meal-group {
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 10px;
+    border-left: 4px solid #FF6B6B;
+}
+
+.meal-group h4 {
     margin-bottom: 8px;
+    color: #2c3e50;
 }
 
-.stat-label {
-    font-size: 0.95rem;
-    color: var(--text-light);
+.meal-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+.meal-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.meal-rating {
+    font-size: 0.9rem;
+    margin-right: 12px;
+}
+
+.meal-points {
+    font-weight: 600;
+    color: #FF6B6B;
+    min-width: 60px;
+    text-align: right;
+}
+
+.empty-state {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+    font-style: italic;
+}
+
+/* ============================================
+   MEAL LOGGING
+   ============================================ */
+
+.meal-type-selector {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.meal-type-btn {
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.meal-type-btn:hover {
+    border-color: #FF6B6B;
+    background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(255,230,109,0.05));
+}
+
+.meal-type-btn.selected {
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+    color: white;
+    border-color: #FF6B6B;
+}
+
+.search-results {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: -8px;
+    position: relative;
+    z-index: 10;
+}
+
+.search-result {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #e0e0e0;
+    transition: all 0.2s ease;
+}
+
+.search-result:hover {
+    background: #f5f5f5;
+    padding-left: 20px;
+}
+
+.search-result:last-child {
+    border-bottom: none;
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+}
+
+.selected-food {
+    background: linear-gradient(135deg, #95E1D3, #80D9D1);
+    color: white;
+    padding: 16px;
+    border-radius: 10px;
+    margin: 12px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.selected-food.hidden {
+    display: none;
+}
+
+.selected-food-name {
+    font-size: 1.2rem;
     font-weight: 600;
 }
 
-/* ==========================================
-   RATING BUTTONS
-   ========================================== */
+.btn-small {
+    background: rgba(255,255,255,0.3);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-small:hover {
+    background: rgba(255,255,255,0.5);
+}
 
 .rating-buttons {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin: 12px 0;
 }
 
 .rating-btn {
     background: white;
-    border: 3px solid #E0E0E0;
-    border-radius: 12px;
-    padding: 12px 8px;
-    font-size: 2rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 12px;
     cursor: pointer;
-    width: 60px;
-    height: 60px;
+    font-size: 2rem;
+    transition: all 0.3s ease;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    min-height: 100px;
+    gap: 4px;
+}
+
+.rating-btn small {
+    font-size: 0.7rem;
+    color: #666;
 }
 
 .rating-btn:hover {
-    border-color: var(--primary-color);
-    transform: scale(1.1);
+    border-color: #FF6B6B;
+    transform: scale(1.05);
 }
 
 .rating-btn.selected {
-    border-color: var(--primary-color);
-    background: rgba(255, 107, 107, 0.1);
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+    border-color: #FF6B6B;
+    color: white;
 }
 
-/* ==========================================
-   ACHIEVEMENTS
-   ========================================== */
-
-.achievements-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 16px;
+.rating-btn.selected small {
+    color: white;
 }
 
-.achievement-badge {
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.button-group .btn {
+    flex: 1;
+}
+
+.foods-added-list {
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 10px;
+    margin: 12px 0;
+}
+
+.food-added-item {
+    padding: 8px;
     background: white;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    color: #2c3e50;
+}
+
+/* ============================================
+   WATER LOGGER
+   ============================================ */
+
+.water-display {
+    background: linear-gradient(135deg, #4ECDC4, #3dbab2);
+    color: white;
+    padding: 24px;
     border-radius: 16px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
+    margin-bottom: 24px;
 }
 
-.achievement-badge:hover {
-    transform: scale(1.05);
-    box-shadow: var(--shadow-hover);
+.water-progress {
+    background: rgba(255,255,255,0.2);
+    height: 40px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 16px;
 }
 
-.achievement-icon {
-    font-size: 3rem;
-    margin-bottom: 8px;
-}
-
-.achievement-name {
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--text-dark);
-    margin-bottom: 4px;
-}
-
-.achievement-description {
-    font-size: 0.85rem;
-    color: var(--text-light);
-}
-
-/* ==========================================
-   PREFERENCES
-   ========================================== */
-
-.preferences-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 16px;
-}
-
-.food-card {
-    background: white;
-    border-radius: 16px;
-    padding: 16px;
-    text-align: center;
-    box-shadow: var(--shadow);
-}
-
-.food-card .emoji {
-    font-size: 3rem;
-    margin-bottom: 8px;
-}
-
-.food-card .name {
+.water-filled {
+    background: linear-gradient(90deg, #4ECDC4, #95E1D3);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
     font-weight: 600;
-    font-size: 0.95rem;
-    color: var(--text-dark);
+    font-size: 0.85rem;
 }
 
-/* ==========================================
+.water-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.1rem;
+}
+
+.water-current {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.water-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.water-message {
+    background: linear-gradient(135deg, #95E1D3, #80D9D1);
+    color: white;
+    padding: 16px;
+    border-radius: 10px;
+    margin: 12px 0;
+    text-align: center;
+}
+
+.water-message p {
+    margin: 0;
+    font-weight: 600;
+}
+
+/* ============================================
    MODALS
-   ========================================== */
+   ============================================ */
 
 .modal {
     position: fixed;
@@ -473,53 +709,32 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 20px;
-}
-
-.modal.active {
+    background: rgba(0,0,0,0.5);
     display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-.modal-content-child {
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
     background: white;
-    border-radius: 24px;
-    padding: 40px;
-    text-align: center;
-    max-width: 400px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideIn 0.3s ease;
+    padding: 0;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.3s ease;
 }
 
-.success-icon {
-    font-size: 4rem;
-    margin-bottom: 16px;
-    animation: bounce 0.6s ease infinite;
-}
-
-.modal-content-child h2 {
-    font-size: 1.8rem;
-    margin-bottom: 12px;
-    color: var(--primary-color);
-}
-
-.modal-content-child p {
-    font-size: 1.1rem;
-    color: var(--text-light);
-    margin-bottom: 24px;
-}
-
-/* ==========================================
-   ANIMATIONS
-   ========================================== */
-
-@keyframes slideIn {
+@keyframes slideUp {
     from {
-        transform: translateY(-50px);
+        transform: translateY(50px);
         opacity: 0;
     }
     to {
@@ -528,102 +743,247 @@ body {
     }
 }
 
+.modal-header {
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 20px 20px 0 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-success {
+    background: white;
+    text-align: center;
+    padding: 40px 24px;
+}
+
+.success-animation {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: bounce 0.6s ease infinite;
+}
+
 @keyframes bounce {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.1);
-    }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
 }
 
-/* ==========================================
-   ERROR & SUCCESS MESSAGES
-   ========================================== */
+.modal-success h2 {
+    font-size: 1.8rem;
+    color: #FF6B6B;
+    margin-bottom: 12px;
+}
 
-.error-box {
-    background: #FFE0E0;
-    color: #C33;
-    padding: 12px 16px;
-    border-radius: 8px;
+.modal-success p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* ============================================
+   STATS DETAIL
+   ============================================ */
+
+.stats-detail {
+    background: white;
+}
+
+.meal-group-detail {
+    background: #f9f9f9;
+    padding: 16px;
+    border-radius: 10px;
     margin-bottom: 16px;
-    display: none;
+    border-left: 4px solid #FF6B6B;
 }
 
-.error-box.show {
-    display: block;
+.meal-group-detail h3 {
+    margin-bottom: 12px;
+    color: #2c3e50;
 }
 
-/* ==========================================
-   RESPONSIVE DESIGN
-   ========================================== */
-
-@media (max-width: 768px) {
-    .header-child h1 {
-        font-size: 1.4rem;
-    }
-
-    .dashboard-content-child {
-        padding: 16px;
-    }
-
-    .action-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .login-form {
-        padding: 32px 20px;
-    }
-
-    .rating-buttons {
-        gap: 8px;
-    }
-
-    .rating-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.5rem;
-    }
+.meal-detail-item {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-@media (max-width: 480px) {
-    .header-child {
+.meal-detail-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.meal-detail-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.rating {
+    font-size: 0.9rem;
+}
+
+.points {
+    font-weight: 600;
+    color: #FF6B6B;
+}
+
+.total-points-box {
+    background: linear-gradient(135deg, #FFE66D, #FFD93D);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: 16px;
+    font-size: 1.2rem;
+}
+
+.total-points-box .icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+/* ============================================
+   ACHIEVEMENTS
+   ============================================ */
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.achievement-badge {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.achievement-badge:hover {
+    border-color: #FFE66D;
+    box-shadow: 0 8px 16px rgba(255, 230, 109, 0.3);
+    transform: translateY(-4px);
+}
+
+.achievement-icon {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.achievement-name {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 4px;
+}
+
+.achievement-description {
+    font-size: 0.85rem;
+    color: #999;
+}
+
+/* ============================================
+   PREFERENCES
+   ============================================ */
+
+.preferences-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.preference-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.preference-card:hover {
+    border-color: #FF6B6B;
+    box-shadow: 0 6px 12px rgba(255, 107, 107, 0.2);
+}
+
+.pref-emoji {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+.pref-name {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+}
+
+.pref-rating {
+    color: #FFE66D;
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 600px) {
+    .dashboard-header {
         flex-direction: column;
         gap: 12px;
         text-align: center;
     }
-
-    .header-child h1 {
-        font-size: 1.3rem;
+    
+    .dashboard-header h1 {
+        font-size: 1.5rem;
     }
-
-    .action-grid {
+    
+    .summary-grid {
         grid-template-columns: 1fr;
     }
-
-    .login-wrapper {
-        padding: 16px;
+    
+    .actions-grid {
+        grid-template-columns: 1fr;
     }
-
-    .logo-section h1 {
-        font-size: 2.5rem;
+    
+    .rating-buttons {
+        grid-template-columns: repeat(5, 1fr);
     }
-
-    .modal-content-child {
-        padding: 32px 20px;
+    
+    .modal-content {
+        width: 95%;
     }
 }
 
-/* ==========================================
-   PRINT STYLES
-   ========================================== */
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
 
-@media print {
-    body {
-        background: white;
-    }
+.hidden {
+    display: none !important;
+}
 
-    .btn {
-        display: none;
-    }
+.empty-state-large {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-state-large p {
+    color: #999;
+    margin: 8px 0;
 }

@@ -1,9 +1,9 @@
 // ============================================
-// 🥗 NutraKids - Child App (FIXED VERSION)
-// Complete JavaScript for kid-friendly experience
+// 🥗 NutraKids - Child App V1.1
+// Simplified meal logging + gamification
 // ============================================
 
-console.log('=== NutraKids Child App Starting ===');
+console.log('=== NutraKids Child App V1.1 Starting ===');
 
 // ============================================
 // APP STATE
@@ -15,7 +15,12 @@ const appState = {
     meals: [],
     foods: [],
     achievements: [],
-    selectedRating: 0
+    selectedRating: 0,
+    selectedFood: null,
+    selectedMealType: 'breakfast',
+    totalPoints: 0,
+    todayPoints: 0,
+    waterToday: 0
 };
 
 // ============================================
@@ -31,25 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupEventListeners() {
     console.log('Setting up event listeners...');
     
-    // Login form
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', handleChildLogin);
-        console.log('✅ Login form listener attached');
     }
     
-    // Meal logging form
-    const mealForm = document.getElementById('mealLoggingForm');
-    if (mealForm) {
-        mealForm.addEventListener('submit', handleLogMeal);
-        console.log('✅ Meal logging form listener attached');
+    const foodSearch = document.getElementById('foodSearch');
+    if (foodSearch) {
+        foodSearch.addEventListener('input', handleFoodSearch);
     }
     
-    // Logout button
     const childLogoutBtn = document.getElementById('childLogoutBtn');
     if (childLogoutBtn) {
         childLogoutBtn.addEventListener('click', handleLogout);
-        console.log('✅ Logout button listener attached');
     }
     
     console.log('✅ Event listeners setup complete');
@@ -70,19 +69,17 @@ function checkAuth() {
     .then(data => {
         console.log('Auth check response:', data);
         if (data.authenticated && data.user) {
-            console.log('User type:', data.user.user_type);
-            // Check if user is a child
             if (data.user.user_type === 'child') {
-                console.log('✅ Child authenticated, loading dashboard');
+                console.log('✅ Child authenticated');
                 appState.currentUser = data.user;
                 appState.currentChild = data.user;
                 loadChildDashboard();
             } else {
-                console.log('❌ Not a child account, showing login');
+                console.log('❌ Not a child account');
                 showScreen('loginScreen');
             }
         } else {
-            console.log('❌ Not authenticated, showing login');
+            console.log('❌ Not authenticated');
             showScreen('loginScreen');
         }
     })
@@ -99,43 +96,33 @@ function handleChildLogin(e) {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     
-    console.log('Attempting login with email:', email);
-    
     fetch('../../backend/api/index.php?action=parent_login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ email, password })
     })
-    .then(r => {
-        console.log('Response status:', r.status);
-        return r.json();
-    })
+    .then(r => r.json())
     .then(data => {
         console.log('Login response:', data);
         
         if (data.success && data.user) {
-            console.log('User type from server:', data.user.user_type);
-            
-            // ⭐ CHECK IF CHILD ACCOUNT ⭐
             if (data.user.user_type === 'child') {
-                console.log('✅ Child account detected - login successful');
+                console.log('✅ Child login successful');
                 appState.currentUser = data.user;
                 appState.currentChild = data.user;
                 clearLoginErrors();
                 loadChildDashboard();
             } else {
-                console.log('❌ Account is not a child account:', data.user.user_type);
-                showLoginError('❌ This is not a child account! Ask your parents for your login info.');
+                showLoginError('❌ This is not a child account!');
             }
         } else {
-            console.log('❌ Login failed:', data.message);
-            showLoginError(data.message || 'Login failed. Check your email and password!');
+            showLoginError(data.message || 'Login failed');
         }
     })
     .catch(error => {
         console.error('Login error:', error);
-        showLoginError('Connection error. Please try again!');
+        showLoginError('Connection error');
     });
 }
 
@@ -148,7 +135,6 @@ function handleLogout(e) {
         credentials: 'include'
     })
     .then(() => {
-        console.log('✅ Logged out');
         appState.currentUser = null;
         appState.currentChild = null;
         showScreen('loginScreen');
@@ -184,15 +170,72 @@ function loadChildDashboard() {
     }
     
     loadFoods();
-    loadAchievements(); // Load but don't wait - will render when ready
+    loadAchievements();
     
-    // Wait for meals to load before calculating today's stats
     loadMeals().then(() => {
-        console.log('Meals loaded, now calculating stats...');
-        loadTodayStats();
+        console.log('Meals loaded, updating dashboard...');
+        updateDashboardStats();
+        displayTodaysMeals();
     });
     
+    loadDailyPoints();
+    
     showScreen('childDashboard');
+}
+
+function updateDashboardStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const todayMeals = appState.meals.filter(m => {
+        return m.meal_date === today || (m.logged_at && m.logged_at.startsWith(today));
+    });
+    
+    document.getElementById('mealsLoggedCount').textContent = todayMeals.length;
+    
+    // Calculate average rating
+    const ratings = todayMeals.filter(m => m.meal_rating).map(m => m.meal_rating);
+    const avgRating = ratings.length > 0 ? (ratings.reduce((a, b) => a + b) / ratings.length).toFixed(1) : '-';
+    document.getElementById('avgRatingDisplay').textContent = avgRating;
+}
+
+function displayTodaysMeals() {
+    const today = new Date().toISOString().split('T')[0];
+    const todayMeals = appState.meals.filter(m => 
+        m.meal_date === today || (m.logged_at && m.logged_at.startsWith(today))
+    );
+    
+    const container = document.getElementById('todayMealsBreakdown');
+    
+    if (todayMeals.length === 0) {
+        container.innerHTML = '<p class="empty-state">No foods logged yet. Start logging! 🍽️</p>';
+        return;
+    }
+    
+    // Group by meal type
+    const grouped = {};
+    todayMeals.forEach(meal => {
+        if (!grouped[meal.meal_type]) grouped[meal.meal_type] = [];
+        grouped[meal.meal_type].push(meal);
+    });
+    
+    const icons = { breakfast: '🌅', lunch: '🌞', dinner: '🌙', snack: '🍿' };
+    
+    let html = '';
+    for (const [type, meals] of Object.entries(grouped)) {
+        html += `<div class="meal-group">
+                    <h4>${icons[type]} ${type.charAt(0).toUpperCase() + type.slice(1)}</h4>`;
+        
+        meals.forEach(meal => {
+            html += `<div class="meal-item">
+                        <div class="meal-name">${meal.meal_name}</div>
+                        <div class="meal-rating">${'⭐'.repeat(meal.meal_rating)}</div>
+                        <div class="meal-points">+${meal.points_earned || 10} pts</div>
+                     </div>`;
+        });
+        
+        html += '</div>';
+    }
+    
+    container.innerHTML = html;
 }
 
 // ============================================
@@ -203,108 +246,97 @@ function showScreen(screenId) {
     console.log('📱 Switching to screen:', screenId);
     
     const screens = document.querySelectorAll('.screen');
-    screens.forEach(screen => {
-        screen.classList.remove('active');
-    });
+    screens.forEach(screen => screen.classList.remove('active'));
     
     const targetScreen = document.getElementById(screenId);
     if (targetScreen) {
         targetScreen.classList.add('active');
         console.log('✅ Screen switched to:', screenId);
         
-        // Load data for screens that need it
         if (screenId === 'todayStatsScreen') {
-            // Make sure meals are loaded before calculating stats
-            if (!appState.meals || appState.meals.length === 0) {
-                loadMeals().then(() => loadTodayStats());
-            } else {
-                loadTodayStats();
-            }
+            loadTodayStats();
         } else if (screenId === 'achievementsScreen') {
             loadAchievements();
         } else if (screenId === 'foodPreferencesScreen') {
             loadFoodPreferences();
-        } else if (screenId === 'mealHistoryScreen') {
-            loadMealHistory();
         }
     }
 }
 
 // ============================================
-// MEALS & FOOD
+// MEAL LOGGING - SIMPLIFIED
 // ============================================
 
-function loadFoods() {
-    console.log('🍽️ Loading foods from API...');
-    
-    fetch('../../backend/api/index.php?action=get_household_foods', {
-        method: 'GET',
-        credentials: 'include'
-    })
-    .then(r => r.json())
-    .then(data => {
-        console.log('Foods loaded:', data);
-        
-        if (data.success) {
-            appState.foods = data.foods.map(f => ({
-                id: f.food_id,
-                name: f.food_name,
-                emoji: f.emoji,
-                category: f.category
-            }));
-            console.log('✅ Foods count:', appState.foods.length);
-        }
-    })
-    .catch(e => {
-        console.error('Error loading foods:', e);
-        appState.foods = [];
-    });
-}
-
-function loadMeals() {
-    console.log('📜 Loading meals from API...');
-    
-    const childId = appState.currentChild?.user_id;
-    if (!childId) {
-        console.error('❌ No child ID available for meals');
-        return Promise.resolve([]);
-    }
-    
-    return fetch(`../../backend/api/index.php?action=get_meals&child_id=${childId}`, {
-        method: 'GET',
-        credentials: 'include'
-    })
-    .then(r => r.json())
-    .then(data => {
-        console.log('Meals loaded:', data);
-        
-        if (data.success) {
-            appState.meals = data.meals || [];
-            console.log('✅ Meals count:', appState.meals.length);
-            return appState.meals;
-        }
-        return [];
-    })
-    .catch(e => {
-        console.error('Error loading meals:', e);
-        appState.meals = [];
-        return [];
-    });
-}
-
-// ============================================
-// MEAL LOGGING
-// ============================================
-
-function setRating(rating) {
-    console.log('⭐ Setting rating:', rating);
-    
-    appState.selectedRating = rating;
-    document.getElementById('mealRating').value = rating;
+function selectMealType(type) {
+    appState.selectedMealType = type;
+    document.getElementById('selectedMealType').value = type;
     
     // Visual feedback
-    const buttons = document.querySelectorAll('.rating-btn');
-    buttons.forEach(btn => {
+    document.querySelectorAll('.meal-type-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+    
+    console.log('Meal type selected:', type);
+}
+
+function handleFoodSearch(e) {
+    const query = e.target.value.toLowerCase().trim();
+    const resultsDiv = document.getElementById('foodSearchResults');
+    
+    if (!query) {
+        resultsDiv.innerHTML = '';
+        return;
+    }
+    
+    // Filter foods
+    const results = appState.foods.filter(f => 
+        f.name.toLowerCase().includes(query)
+    ).slice(0, 8);
+    
+    if (results.length === 0) {
+        resultsDiv.innerHTML = '<div class="no-results">No foods found</div>';
+        return;
+    }
+    
+    const html = results.map(food => `
+        <div class="search-result" onclick="selectFood({id: ${food.id}, name: '${food.name}'})">
+            <span>${food.emoji || '🍽️'}</span> ${food.name}
+        </div>
+    `).join('');
+    
+    resultsDiv.innerHTML = html;
+}
+
+function selectFood(food) {
+    appState.selectedFood = food;
+    document.getElementById('foodSearch').value = food.name;
+    document.getElementById('foodSearchResults').innerHTML = '';
+    
+    // Show selected food and rating section
+    document.getElementById('selectedFoodDisplay').classList.remove('hidden');
+    document.getElementById('selectedFoodName').textContent = food.name;
+    document.getElementById('ratingSection').style.display = 'block';
+    document.getElementById('actionButtons').style.display = 'block';
+    
+    console.log('Food selected:', food);
+}
+
+function clearFoodSelection() {
+    appState.selectedFood = null;
+    appState.selectedRating = 0;
+    document.getElementById('foodSearch').value = '';
+    document.getElementById('selectedFoodDisplay').classList.add('hidden');
+    document.getElementById('ratingSection').style.display = 'none';
+    document.getElementById('actionButtons').style.display = 'none';
+    document.querySelectorAll('.rating-btn').forEach(btn => btn.classList.remove('selected'));
+}
+
+function setRating(rating) {
+    console.log('⭐ Rating set:', rating);
+    appState.selectedRating = rating;
+    
+    document.querySelectorAll('.rating-btn').forEach(btn => {
         btn.classList.remove('selected');
         if (parseInt(btn.dataset.rating) === rating) {
             btn.classList.add('selected');
@@ -312,110 +344,339 @@ function setRating(rating) {
     });
 }
 
-function handleLogMeal(e) {
-    e.preventDefault();
-    console.log('🍽️ === LOG MEAL START ===');
+function handleLogFood() {
+    if (!appState.selectedFood) {
+        alert('Please select a food');
+        return;
+    }
+    if (!appState.selectedRating) {
+        alert('Please rate the food');
+        return;
+    }
     
-    const mealName = document.getElementById('mealName').value.trim();
-    const mealType = document.getElementById('mealType').value;
-    const rating = appState.selectedRating;
     const childId = appState.currentChild?.user_id;
-    
     if (!childId) {
-        alert('Error: Child ID not found. Please reload the page.');
+        alert('Error: Child ID not found');
         return;
     }
     
-    if (!mealName || !mealType || !rating) {
-        alert('Please fill all fields and select a rating! 🙏');
-        return;
-    }
+    console.log('🍽️ Logging food:', appState.selectedFood);
     
-    console.log('Logging meal:', { childId, mealName, mealType, rating });
-    
-    fetch('../../backend/api/index.php?action=log_meal', {
+    fetch('../../backend/api/index.php?action=log_food', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
             child_id: childId,
-            meal_name: mealName,
-            meal_type: mealType,
-            meal_rating: rating
+            food_id: appState.selectedFood.id,
+            food_name: appState.selectedFood.name,
+            meal_type: appState.selectedMealType,
+            meal_rating: appState.selectedRating
         })
     })
     .then(r => r.json())
     .then(data => {
-        console.log('Log meal response:', data);
+        console.log('Log food response:', data);
         
         if (data.success) {
-            console.log('✅ Meal logged successfully');
+            console.log('✅ Food logged!', data);
+            
+            // Show success with points
+            showSuccessModal(
+                `🎉 ${appState.selectedFood.name} logged!\n+${data.points_earned} points!`,
+                data.bonus_reason || ''
+            );
+            
+            // Reload data
+            loadMeals().then(() => {
+                updateDashboardStats();
+                displayTodaysMeals();
+            });
+            loadDailyPoints();
             
             // Reset form
-            document.getElementById('mealLoggingForm').reset();
-            appState.selectedRating = 0;
-            document.querySelectorAll('.rating-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
+            clearFoodSelection();
+            document.getElementById('foodSearch').focus();
             
-            // Reload meals and show success
-            loadMeals();
-            loadTodayStats();
-            
-            showSuccessModal('🎉 Awesome! Your meal has been saved!');
-            
-            // Return to dashboard after celebration
-            setTimeout(() => {
-                showScreen('childDashboard');
-            }, 2000);
+            // Show added foods
+            displayAddedFoods();
         } else {
-            alert('Error: ' + (data.message || 'Failed to log meal'));
+            alert('Error: ' + (data.message || 'Failed to log food'));
         }
     })
     .catch(error => {
-        console.error('Error logging meal:', error);
+        console.error('Error logging food:', error);
         alert('Connection error: ' + error.message);
     });
 }
 
+function handleContinueAdding() {
+    document.getElementById('foodsAddedSection').style.display = 'none';
+    document.getElementById('foodSearch').focus();
+}
+
+function displayAddedFoods() {
+    const today = new Date().toISOString().split('T')[0];
+    const todayMeals = appState.meals.filter(m => 
+        m.meal_date === today || (m.logged_at && m.logged_at.startsWith(today))
+    );
+    
+    if (todayMeals.length > 0) {
+        const list = todayMeals.map(meal => 
+            `<div class="food-added-item">✓ ${meal.meal_name} ${('⭐').repeat(meal.meal_rating)}</div>`
+        ).join('');
+        
+        document.getElementById('foodsAddedList').innerHTML = list;
+        document.getElementById('foodsAddedSection').style.display = 'block';
+    }
+}
+
 // ============================================
-// ACHIEVEMENTS
+// WATER LOGGING
 // ============================================
 
-function loadAchievements() {
-    console.log('🏆 Loading achievements...');
-    
+function openWaterLogger() {
+    console.log('💧 Opening water logger');
+    document.getElementById('waterLoggerModal').classList.remove('hidden');
+    updateWaterDisplay();
+}
+
+function closeWaterLogger() {
+    document.getElementById('waterLoggerModal').classList.add('hidden');
+}
+
+function addWater(cups) {
     const childId = appState.currentChild?.user_id;
     if (!childId) {
-        console.error('❌ No child ID for achievements');
-        return Promise.resolve([]);
+        alert('Error: Child ID not found');
+        return;
     }
     
-    return fetch(`../../backend/api/index.php?action=get_achievements&child_id=${childId}`, {
+    console.log('💧 Adding water:', cups, 'cups');
+    
+    fetch('../../backend/api/index.php?action=log_water', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+            child_id: childId,
+            cups: cups
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        console.log('Water log response:', data);
+        
+        if (data.success) {
+            appState.waterToday = data.water_today;
+            
+            let message = `💧 Great! You drank ${cups} cup${cups > 1 ? 's' : ''}! +${data.points_earned} pts`;
+            if (data.bonus) {
+                message += `\n🎉 ${data.bonus}`;
+            }
+            
+            document.getElementById('waterMessage').innerHTML = `<p>${message}</p>`;
+            updateWaterDisplay();
+            
+            // Update dashboard water count
+            document.getElementById('waterLoggedCount').textContent = appState.waterToday;
+            
+            // Reload points
+            loadDailyPoints();
+            
+            // Update dashboard display
+            setTimeout(() => {
+                document.getElementById('totalPointsDisplay').textContent = appState.totalPoints;
+                document.getElementById('todayPointsDisplay').textContent = appState.todayPoints;
+            }, 300);
+        } else {
+            alert('Error: ' + (data.message || 'Failed to log water'));
+        }
+    })
+    .catch(error => {
+        console.error('Water logging error:', error);
+        alert('Connection error');
+    });
+}
+
+function updateWaterDisplay() {
+    const waterFilled = document.getElementById('waterFilled');
+    const waterCurrentCount = document.getElementById('waterCurrentCount');
+    
+    if (waterFilled && waterCurrentCount) {
+        const percentage = Math.min((appState.waterToday / 8) * 100, 100);
+        waterFilled.style.width = percentage + '%';
+        waterCurrentCount.textContent = appState.waterToday;
+        
+        console.log('💧 Water display updated:', appState.waterToday, '/', 8, '=', percentage + '%');
+    }
+}
+
+// ============================================
+// POINTS & STATS
+// ============================================
+
+function loadDailyPoints() {
+    const childId = appState.currentChild?.user_id;
+    if (!childId) return;
+    
+    console.log('📊 Loading daily points...');
+    
+    fetch(`../../backend/api/index.php?action=get_daily_points&child_id=${childId}`, {
         credentials: 'include'
     })
     .then(r => r.json())
     .then(data => {
-        console.log('Achievements response:', data);
+        console.log('Points response:', data);
         
-        if (data.success && data.achievements) {
-            appState.achievements = data.achievements;
-            console.log('✅ Achievements loaded:', appState.achievements.length);
-            renderAchievements();
-            return appState.achievements;
-        } else {
-            console.warn('⚠️ No achievements found:', data.message);
-            appState.achievements = [];
-            renderAchievements(); // Show empty message
-            return [];
+        if (data.success) {
+            // Update appState
+            appState.totalPoints = data.total_points;
+            appState.todayPoints = data.today_points;
+            appState.waterToday = data.water_intake;
+            
+            // Update displays
+            const totalDisplay = document.getElementById('totalPointsDisplay');
+            const todayDisplay = document.getElementById('todayPointsDisplay');
+            const waterDisplay = document.getElementById('waterLoggedCount');
+            
+            if (totalDisplay) totalDisplay.textContent = appState.totalPoints;
+            if (todayDisplay) todayDisplay.textContent = appState.todayPoints;
+            if (waterDisplay) waterDisplay.textContent = appState.waterToday;
+            
+            // Update water progress bar
+            updateWaterDisplay();
+            
+            console.log('✅ Points updated:', appState);
         }
     })
     .catch(e => {
-        console.error('❌ Error loading achievements:', e);
-        appState.achievements = [];
-        renderAchievements(); // Show empty message on error
+        console.error('Error loading points:', e);
+    });
+}
+
+function loadTodayStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const todayMeals = appState.meals.filter(m => 
+        m.meal_date === today || (m.logged_at && m.logged_at.startsWith(today))
+    );
+    
+    const statsDiv = document.getElementById('todayStatsDetail');
+    
+    if (todayMeals.length === 0) {
+        statsDiv.innerHTML = `
+            <div class="empty-state-large">
+                <div style="font-size: 3rem; margin-bottom: 12px;">🍽️</div>
+                <p>No foods logged yet today!</p>
+                <p style="color: #999;">Start logging to see your stats!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const grouped = {};
+    todayMeals.forEach(meal => {
+        if (!grouped[meal.meal_type]) grouped[meal.meal_type] = [];
+        grouped[meal.meal_type].push(meal);
+    });
+    
+    const icons = { breakfast: '🌅', lunch: '🌞', dinner: '🌙', snack: '🍿' };
+    let html = '<div class="stats-detail">';
+    
+    for (const [type, meals] of Object.entries(grouped)) {
+        const typePoints = meals.reduce((sum, m) => sum + (m.points_earned || 10), 0);
+        html += `<div class="meal-group-detail">
+                    <h3>${icons[type]} ${type.charAt(0).toUpperCase() + type.slice(1)} (${typePoints} pts)</h3>`;
+        
+        meals.forEach(meal => {
+            html += `<div class="meal-detail-item">
+                        <div class="meal-detail-name">${meal.meal_name}</div>
+                        <div class="meal-detail-info">
+                            <span class="rating">${'⭐'.repeat(meal.meal_rating)}</span>
+                            <span class="points">+${meal.points_earned || 10}</span>
+                        </div>
+                    </div>`;
+        });
+        
+        html += '</div>';
+    }
+    
+    html += `<div class="total-points-box">
+                <div class="icon">🌟</div>
+                <strong>Today's Total: ${appState.todayPoints} points!</strong>
+            </div>`;
+    html += '</div>';
+    
+    statsDiv.innerHTML = html;
+}
+
+// ============================================
+// DATA LOADING
+// ============================================
+
+function loadFoods() {
+    console.log('🍽️ Loading foods...');
+    
+    fetch('../../backend/api/index.php?action=get_household_foods', {
+        credentials: 'include'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            appState.foods = data.foods.map(f => ({
+                id: f.food_id,
+                name: f.food_name,
+                emoji: f.emoji,
+                category: f.category
+            }));
+            console.log('✅ Foods loaded:', appState.foods.length);
+        }
+    })
+    .catch(e => console.error('Error loading foods:', e));
+}
+
+function loadMeals() {
+    console.log('📜 Loading meals...');
+    
+    const childId = appState.currentChild?.user_id;
+    if (!childId) {
+        console.error('No child ID');
+        return Promise.resolve([]);
+    }
+    
+    return fetch(`../../backend/api/index.php?action=get_meals&child_id=${childId}`, {
+        credentials: 'include'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            appState.meals = data.meals || [];
+            console.log('✅ Meals loaded:', appState.meals.length);
+            return appState.meals;
+        }
+        return [];
+    })
+    .catch(e => {
+        console.error('Error loading meals:', e);
         return [];
     });
+}
+
+function loadAchievements() {
+    const childId = appState.currentChild?.user_id;
+    if (!childId) return;
+    
+    fetch(`../../backend/api/index.php?action=get_achievements&child_id=${childId}`, {
+        credentials: 'include'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            appState.achievements = data.achievements || [];
+            renderAchievements();
+        }
+    })
+    .catch(e => console.error('Error loading achievements:', e));
 }
 
 function renderAchievements() {
@@ -423,162 +684,35 @@ function renderAchievements() {
     if (!container) return;
     
     if (!appState.achievements || appState.achievements.length === 0) {
-        container.innerHTML = '<p>🎯 Earn achievements by logging meals and staying healthy!</p>';
+        container.innerHTML = '<p class="empty-state">🎯 Earn achievements by logging meals!</p>';
         return;
     }
     
-    const html = appState.achievements.map(achievement => {
-        // emoji field contains either emoji string or icon_url, default to 🏆
-        const icon = achievement.emoji || achievement.icon_url || '🏆';
-        return `
-            <div class="achievement-badge">
-                <div class="achievement-icon">${icon}</div>
-                <div class="achievement-name">${achievement.name}</div>
-                <div class="achievement-description">${achievement.description}</div>
-            </div>
-        `;
-    }).join('');
+    const html = appState.achievements.map(a => `
+        <div class="achievement-badge">
+            <div class="achievement-icon">${a.emoji || '🏆'}</div>
+            <div class="achievement-name">${a.name}</div>
+            <div class="achievement-description">${a.description}</div>
+        </div>
+    `).join('');
     
     container.innerHTML = html;
 }
 
-// ============================================
-// TODAY'S STATS
-// ============================================
-
-function loadTodayStats() {
-    console.log('📊 Loading today stats...');
-    console.log('appState.meals:', appState.meals);
-    
-    if (!appState.meals || appState.meals.length === 0) {
-        console.warn('⚠️ No meals loaded yet');
-        document.getElementById('mealsToday').textContent = '0';
-        document.getElementById('pointsToday').textContent = '0';
-        return;
-    }
-    
-    const today = new Date().toISOString().split('T')[0];
-    console.log('Today date:', today);
-    
-    const todayMeals = appState.meals.filter(m => {
-        console.log('Checking meal:', m);
-        return m.meal_date === today || m.logged_at?.startsWith(today);
-    });
-    
-    console.log('Today meals:', todayMeals);
-    console.log('Today meals count:', todayMeals.length);
-    
-    // Update stats display
-    document.getElementById('mealsToday').textContent = todayMeals.length;
-    document.getElementById('pointsToday').textContent = (todayMeals.length * 10);
-    
-    // Update detailed stats
-    updateDetailedStats(todayMeals);
-    
-    // Generate daily challenge
-    generateDailyChallenge(todayMeals);
-}
-
-function updateDetailedStats(todayMeals) {
-    const statsDiv = document.getElementById('todayStatsDetail');
-    if (!statsDiv) return;
-    
-    if (todayMeals.length === 0) {
-        statsDiv.innerHTML = `
-            <div style="text-align: center; padding: 40px; background: white; border-radius: 16px;">
-                <div style="font-size: 3rem; margin-bottom: 12px;">🍽️</div>
-                <p style="font-size: 1.2rem; color: #666;">No meals logged yet today!</p>
-                <p style="color: #999;">Log your first meal to get started! 🌟</p>
-            </div>
-        `;
-        return;
-    }
-    
-    const mealsHtml = todayMeals.map(meal => `
-        <div style="background: white; padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <strong>${meal.meal_name}</strong>
-                <div style="color: #999; font-size: 0.9rem;">🕐 ${meal.meal_time || 'Time not recorded'}</div>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-size: 1.5rem;">${'⭐'.repeat(meal.meal_rating || 0)}</div>
-                <div style="color: #999; font-size: 0.9rem;">+10 pts</div>
-            </div>
-        </div>
-    `).join('');
-    
-    statsDiv.innerHTML = `
-        <div style="margin-bottom: 24px;">
-            <h3 style="margin-bottom: 12px;">📊 Your Meals Today</h3>
-            ${mealsHtml}
-        </div>
-        <div style="background: linear-gradient(135deg, #95E1D3 0%, #80D9D1 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-            <div style="font-size: 2rem; margin-bottom: 8px;">🌟</div>
-            <strong style="font-size: 1.2rem;">Total Points Today: ${todayMeals.length * 10}</strong>
-        </div>
-    `;
-}
-
-function generateDailyChallenge(todayMeals) {
-    const challengeDiv = document.getElementById('todayChallenge');
-    if (!challengeDiv) return;
-    
-    const challenges = [
-        { icon: '🥗', text: 'Try a new vegetable today!', points: 20 },
-        { icon: '💧', text: 'Drink 8 glasses of water!', points: 15 },
-        { icon: '🍎', text: 'Eat a fruit for snack time!', points: 15 },
-        { icon: '🥇', text: 'Rate 3 meals today!', points: 25 },
-        { icon: '⚡', text: 'Be healthy champion today!', points: 20 }
-    ];
-    
-    const challenge = challenges[Math.floor(Math.random() * challenges.length)];
-    
-    challengeDiv.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="font-size: 2.5rem;">${challenge.icon}</div>
-            <div>
-                <strong style="font-size: 1.1rem;">${challenge.text}</strong>
-                <div style="color: #888; font-size: 0.95rem;">+${challenge.points} bonus points! 🎁</div>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================
-// FOOD PREFERENCES
-// ============================================
-
 function loadFoodPreferences() {
-    console.log('❤️ Loading food preferences...');
-    
     const childId = appState.currentChild?.user_id;
-    if (!childId) {
-        console.error('❌ No child ID for preferences');
-        return Promise.resolve([]);
-    }
+    if (!childId) return;
     
-    return fetch(`../../backend/api/index.php?action=get_food_preferences&child_id=${childId}`, {
+    fetch(`../../backend/api/index.php?action=get_food_preferences&child_id=${childId}`, {
         credentials: 'include'
     })
     .then(r => r.json())
     .then(data => {
-        console.log('Food preferences response:', data);
-        
-        if (data.success && data.preferences) {
-            console.log('✅ Food preferences loaded:', data.preferences.length);
-            renderFoodPreferences(data.preferences);
-            return data.preferences;
-        } else {
-            console.warn('⚠️ No food preferences found');
-            renderFoodPreferences([]);
-            return [];
+        if (data.success) {
+            renderFoodPreferences(data.preferences || []);
         }
     })
-    .catch(e => {
-        console.error('❌ Error loading preferences:', e);
-        renderFoodPreferences([]);
-        return [];
-    });
+    .catch(e => console.error('Error loading preferences:', e));
 }
 
 function renderFoodPreferences(preferences) {
@@ -586,134 +720,58 @@ function renderFoodPreferences(preferences) {
     if (!container) return;
     
     if (!preferences || preferences.length === 0) {
-        container.innerHTML = '<p>📋 Your food preferences will appear here!</p>';
+        container.innerHTML = '<p class="empty-state">❤️ Foods you rate will appear here!</p>';
         return;
     }
     
     const html = preferences.map(pref => {
-        const stars = pref.rating ? '⭐'.repeat(pref.rating) : 'Not rated yet';
-        return `
-            <div class="food-card">
-                <div class="emoji">${pref.emoji || '🍽️'}</div>
-                <div class="name">${pref.food_name}</div>
-                <div style="font-size: 0.9rem; color: #666; margin-top: 8px;">${stars}</div>
-            </div>
-        `;
+        const stars = '⭐'.repeat(pref.rating || 0);
+        return `<div class="preference-card">
+                    <div class="pref-emoji">${pref.emoji || '🍽️'}</div>
+                    <div class="pref-name">${pref.food_name}</div>
+                    <div class="pref-rating">${stars}</div>
+                </div>`;
     }).join('');
     
     container.innerHTML = html;
 }
 
 // ============================================
-// MEAL HISTORY
+// MODALS & MESSAGES
 // ============================================
 
-function loadMealHistory() {
-    console.log('📜 Loading meal history...');
-    
-    const container = document.getElementById('mealHistoryContainer');
-    if (!container) return;
-    
-    if (!appState.meals || appState.meals.length === 0) {
-        container.innerHTML = '<p>📜 No meals logged yet. Start logging to build your history!</p>';
-        return;
-    }
-    
-    // Group meals by date (most recent first)
-    const sortedMeals = [...appState.meals].sort((a, b) => 
-        new Date(b.meal_date) - new Date(a.meal_date)
-    );
-    
-    const grouped = {};
-    sortedMeals.forEach(meal => {
-        if (!grouped[meal.meal_date]) {
-            grouped[meal.meal_date] = [];
-        }
-        grouped[meal.meal_date].push(meal);
-    });
-    
-    let html = '';
-    for (const [date, meals] of Object.entries(grouped)) {
-        const dateObj = new Date(date);
-        const dateStr = dateObj.toLocaleDateString('en-US', { 
-            weekday: 'short', 
-            month: 'short', 
-            day: 'numeric' 
-        });
-        
-        html += `<h3 style="margin-top: 24px; margin-bottom: 12px;">📅 ${dateStr}</h3>`;
-        
-        meals.forEach(meal => {
-            html += `
-                <div style="background: white; padding: 16px; border-radius: 12px; margin-bottom: 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong style="font-size: 1.1rem;">${meal.meal_name}</strong>
-                            <div style="color: #999; font-size: 0.9rem;">🕐 ${meal.meal_time || 'No time recorded'}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 1.5rem;">${'⭐'.repeat(meal.meal_rating || 0) || '(Not rated)'}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-    }
-    
-    container.innerHTML = html || '<p>No meal history available.</p>';
-}
-
-// ============================================
-// SUCCESS MODAL
-// ============================================
-
-function showSuccessModal(message) {
+function showSuccessModal(message, details = '') {
     const modal = document.getElementById('successModal');
-    const messageEl = document.getElementById('successMessage');
-    
-    if (messageEl) {
-        messageEl.textContent = message;
-    }
-    
-    if (modal) {
-        modal.style.display = 'flex';
-        modal.classList.add('active');
-    }
+    document.getElementById('successMessage').textContent = message;
+    document.getElementById('successDetails').textContent = details;
+    modal.classList.remove('hidden');
 }
 
 function closeSuccessModal() {
-    const modal = document.getElementById('successModal');
-    if (modal) {
-        modal.style.display = 'none';
-        modal.classList.remove('active');
-    }
+    document.getElementById('successModal').classList.add('hidden');
 }
 
-// ============================================
-// ABOUT APP
-// ============================================
-
 function showAboutApp() {
-    alert(`
-🥗 NutraKids Child App
-
+    alert(`🥗 NutraKids Child App
+    
 Your personal healthy eating companion!
 
 📊 Features:
-• Log your meals
-• Track today's stats
-• Earn achievements
-• See your favorite foods
-• View your meal history
+• Log the foods you eat
+• Rate how good they are
+• Earn points for logging
+• Try new foods for bonuses
+• Track your water intake
+• View your achievements
 
 🌟 Tips:
-• Rate each meal honestly
-• Try new foods every day
-• Stay healthy and happy!
+• Log each food individually
+• Rate honestly!
+• Drink 8 cups of water daily
+• Try new foods for +20 bonus pts
 
 Made with ❤️ for healthy kids
-Version 1.0 - FIXED
-    `);
+Version 1.1`);
 }
 
 // ============================================
@@ -721,12 +779,17 @@ Version 1.0 - FIXED
 // ============================================
 
 window.showScreen = showScreen;
-window.handleLogMeal = handleLogMeal;
+window.selectMealType = selectMealType;
+window.selectFood = selectFood;
+window.clearFoodSelection = clearFoodSelection;
 window.setRating = setRating;
-window.loadTodayStats = loadTodayStats;
-window.loadAchievements = loadAchievements;
+window.handleLogFood = handleLogFood;
+window.handleContinueAdding = handleContinueAdding;
+window.openWaterLogger = openWaterLogger;
+window.closeWaterLogger = closeWaterLogger;
+window.addWater = addWater;
 window.loadFoodPreferences = loadFoodPreferences;
-window.loadMealHistory = loadMealHistory;
-window.showSuccessModal = showSuccessModal;
 window.closeSuccessModal = closeSuccessModal;
 window.showAboutApp = showAboutApp;
+
+console.log('=== App Ready ===');
